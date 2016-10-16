@@ -1,4 +1,4 @@
-package com.kenitvnn.socket;
+package com.kenitvnn.socket.simple;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -35,4 +35,6 @@ public class SimpleClient {
 		SimpleClient client = new SimpleClient();
 		client.connect();
 	}
+	
+	
 }
