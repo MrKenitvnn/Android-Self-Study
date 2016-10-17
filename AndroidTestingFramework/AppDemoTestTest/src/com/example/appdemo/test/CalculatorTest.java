@@ -15,7 +15,7 @@ public class CalculatorTest extends TestCase{
 	}
 	
 	
-	public void testDivisionCalculate (double expect, double act) {
+	public void testDivisionCalculate () {
 		
 		double expected = 5;
 		System.out.println("Kết quả mong đợi = " + expected);
