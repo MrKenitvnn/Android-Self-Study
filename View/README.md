@@ -59,4 +59,43 @@ Andoird thực hiện tính toán lại kích thước của View.
 Nghĩa là phải chạy vào phương thức onMeasure và đi xuống những phương thức khác để vẽ View.
 
 
+### invalidate & postInvalidate
+Sử dụng phương thức này khi muốn vẽ lại view, nó sẽ gọi onDraw để tiến hành vẽ lại View.
+>invalidate khi muốn vẽ trong UI Thread
+>postInvalidate khi muốn vẽ trong một Thread khác không phải là Main Thread.
+
+### Các phương thức Touch trên View
+Các view cơ bản (không phải ViewGroup) chúng ta có một phương thức touch trên view đó là phương thức onTouchEvent
+```java
+@Override
+public boolean onTouchEvent (MotionEvent event) {
+    Log.e(TAG, "onTouchEvent: " + event);
+    return super.onTouchEvent(event);
+}
+```
+Đối tượng MotionEvent giữ các thông tin về touch như vị trí x,y,action...
+
+#### Nếu View là ViewGroup thì chúng ta có nhiều phương thức xử lý touch hơn nữa. 
+
+```java
+@Override
+public boolean dispatchTouchEvent(MotionEvent event) {
+    return super.dispatchTouchEvent(event);
+}
+
+@Override
+public boolean onInterceptTouchEvent(MotionEvent event) {
+    return super.onInterceptTouchEvent(event);
+}
+
+@Override
+public boolean onTouchEvent(MotionEvent event) {
+    return super.onTouchEvent(event);
+}
+```
+
+
+
+
+
 
