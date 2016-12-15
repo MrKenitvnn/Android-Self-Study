@@ -41,3 +41,104 @@ Kiểm tra xem ứng dụng của bạn có thể handle HTTP link trên hay kh�
 
 Bạn đã làm cho ứng dụng có khả năng cung cấp các màn hình đúng với URL tương ứng tới recipe-app.com.
 Đọc thêm về supporting HTTP link in app, <a href="https://firebase.google.com/docs/app-indexing/android/app#receive-incoming-links-in-your-app">Support links to your app content</a>
+
+
+### Write Personal Content to On-device Index
+Lúc này, bạn có thể sử dụng API để lưu personal content to the on-device index. 
+Ứng dụng Recipe có một tính năng cho phép người dùng bình luận và để lại một ghi chú
+trên mỗi recipe để sử dụng trong tương lai. Bằng cách index user notes, 
+API giúp hiển thị nội dung note recipe được index khi người dùng search nội dung đó trên Google App.
+
+
+Đầu tiên, viết một ```IntentService``` cập nhật index  một cách định kỳ.
+Code follow ```AppIndexingService.java```
+
+```java
+
+public class AppIndexingService extends IntentService {
+...
+   @Override
+   protected void onHandleIntent(Intent intent) {
+       ArrayList<Indexable> indexableNotes = new ArrayList<>();
+
+       for (Recipe recipe : getAllRecipes()) {
+           Note note = recipe.getNote();
+           if (note != null) {
+               Indexable noteToIndex = Indexables.noteDigitalDocumentBuilder()
+                       .setName(recipe.getTitle() + " Note")
+                       .setText(note.getText())
+                       .setUrl(recipe.getNoteUrl())
+                       .build();
+
+               indexableNotes.add(noteToIndex);
+           }
+       }
+
+       if (indexableNotes.size() > 0) {
+           Indexable[] notesArr = new Indexable[indexableNotes.size()];
+           notesArr = indexableNotes.toArray(notesArr);
+
+           // batch insert indexable notes into index
+           FirebaseAppIndex.getInstance().update(notesArr);
+       }
+   }
+...
+}
+```
+
+Cho phép Google Play Services gọi ```IntentService``` 
+này bằng cách thêm nó vào ```AndroidManifest.xml```
+
+```xml
+<service android:name=".client.AppIndexingService"
+  android:exported="true"
+  android:permission="com.google.android.gms.permission.APPINDEXING">
+   <intent-filter>
+       <action android:name="com.google.firebase.appindexing.UPDATE_INDEX" />
+   </intent-filter>
+</service>
+```
+
+
+### Update the On-device Index   
+
+Khi mà user thêm 1 note, ứng dụng nên add thông tin đó tới the on-device index,
+khi đó nó sẽ xuất hiện trong Google app. The API cung cấp nhiều cách để bạn có thể ghi personal content vào index.
+Ví dụ sử dụng ```noteDigitalDocumentBuilder``` trong ```RecipeActivity.java```
+
+```java
+private void indexNote() {
+   Note note = mRecipe.getNote();
+   Indexable noteToIndex = Indexables.noteDigitalDocumentBuilder()
+           .setName(mRecipe.getTitle() + " Note")
+           .setText(note.getText())
+           .setUrl(mRecipe.getNoteUrl())
+           .build();
+
+   Task<Void> task = FirebaseAppIndex.getInstance().update(noteToIndex);
+   task.addOnSuccessListener(new OnSuccessListener<Void>() {
+       @Override
+       public void onSuccess(Void aVoid) {
+           Log.d(TAG, "App Indexing API: Successfully added note to index");
+       }
+   });
+
+   task.addOnFailureListener(new OnFailureListener() {
+       @Override
+       public void onFailure(@NonNull Exception exception) {
+           Log.e(TAG, "App Indexing API: Failed to add note to index. " + exception
+                   .getMessage());
+       }
+   });
+}
+
+```
+
+Bây giờ, khi người dùng thêm 1 note vào Recipe App, nó cũng được thêm vào index.
+
+>Best Practices for Personal Content
+ * Wherever possible, use existing builders, such as those for messages, digital documents, and spreadsheets. For content types without a predefined builder, use Indexable.Builder().
+ * Use predefined data types and properties from <a href="http://schema.org/">Schema.org</a>
+ whenever possible, such as <a href="https://schema.org/DigitalDocument">DigitalDocument</a> ,  <a href="https://schema.org/Conversation">Conversation</a> or <a href="https://schema.org/Person">Person</a>.
+ * Use predefined data types and properties from Schema.org whenever possible, such as DigitalDocument, Conversation or Person.
+ * Use an accurate and descriptive title in your .update() call. The text defined in the title is used in the Google app.
