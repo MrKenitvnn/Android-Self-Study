@@ -1,3 +1,4 @@
+# Java Native Interface (JNI)
 
 ### Tải về/Cài đặt NDK cho Android Studio
  - Android Studio > Preferences > Appearance & Behavior > System Settings > Android SDK > SDK Tools
