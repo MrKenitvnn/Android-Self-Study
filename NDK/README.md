@@ -29,7 +29,7 @@ include $(BUILD_SHARED_LIBRARY)
 ```native_code.c```: file code native : cung cấp các phương thức cho code Java gọi tới.
 
 
-#### 3. Viết code thư native
+#### 3. Viết code
 
 ```java 
 #include <jni.h>
