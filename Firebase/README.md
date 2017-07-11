@@ -8,7 +8,7 @@
 dependencies {
   ...
   // To avoid errors, use the same Firebase SDK version across your app.
-  compile 'com.google.firebase:firebase-appindexing:10.0.1'
+  classpath 'com.google.gms:google-services:3.0.0'
   ...
 }
 ```
